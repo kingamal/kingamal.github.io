@@ -28,6 +28,21 @@ import {
   Timestamp,
 } from 'firebase/firestore';
 
+const Appointment = ({
+  children, style, ...restProps
+}) => (
+  <Appointments.Appointment
+    {...restProps}
+    style={{
+      ...style,
+      backgroundColor: '#2C677B',
+      borderRadius: '8px',
+    }}
+  >
+    {children}
+  </Appointments.Appointment>
+);
+
 export default class Calendar extends React.PureComponent {
   constructor(props) {
     super(props);
@@ -59,64 +74,72 @@ export default class Calendar extends React.PureComponent {
   }
 
   async fetchAppointments() {
-    const appointmentsRef = collection(db, 'appointments');
-    const snapshot = await getDocs(appointmentsRef);
-    const appointments = snapshot.docs.map((doc) => {
-      const data = doc.data();
-      return {
-        id: doc.id,
-        title: data.title,
-        allDay: data.allDay,
-        startDate:
-          data.startDate instanceof Timestamp
-            ? data.startDate.toDate()
-            : data.startDate,
-        endDate:
-          data.endDate instanceof Timestamp
-            ? data.endDate.toDate()
-            : data.endDate,
-        rRule: data.rRule || null,
-      };
-    });
-    this.setState({ data: appointments });
+    try {
+      const appointmentsRef = collection(db, 'appointments');
+      const snapshot = await getDocs(appointmentsRef);
+      const appointments = snapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          title: data.title,
+          allDay: data.allDay,
+          startDate:
+            data.startDate instanceof Timestamp
+              ? data.startDate.toDate()
+              : data.startDate,
+          endDate:
+            data.endDate instanceof Timestamp
+              ? data.endDate.toDate()
+              : data.endDate,
+          rRule: data.rRule || null,
+        };
+      });
+      this.setState({ data: appointments });
+    } catch (error) {
+      console.error('Error fetching appointments:', error);
+    }
   }
 
   async commitChanges({ added, changed, deleted }) {
-    let { data } = this.state;
+    try {
+      let { data } = this.state;
 
-    if (added) {
-      const newAppointment = { ...added };
-      const docRef = await addDoc(
-        collection(db, 'appointments'),
-        newAppointment
-      );
-      newAppointment.id = docRef.id;
-      data = [...data, newAppointment];
+      if (added) {
+        const newAppointment = { ...added };
+        const docRef = await addDoc(
+          collection(db, 'appointments'),
+          newAppointment
+        );
+        newAppointment.id = docRef.id;
+        data = [...data, newAppointment];
+      }
+
+      if (changed) {
+        data = data.map((appointment) => {
+          if (changed[appointment.id]) {
+            const updatedAppointment = {
+              ...appointment,
+              ...changed[appointment.id],
+            };
+            updateDoc(
+              doc(db, 'appointments', appointment.id),
+              updatedAppointment
+            );
+            return updatedAppointment;
+          }
+          return appointment;
+        });
+      }
+
+      if (deleted !== undefined) {
+        await deleteDoc(doc(db, 'appointments', deleted));
+        data = data.filter((appointment) => appointment.id !== deleted);
+      }
+
+      this.setState({ data });
+    } catch (error) {
+      console.error('Error committing changes:', error);
     }
-
-    if (changed) {
-      data = data.map((appointment) => {
-        if (changed[appointment.id]) {
-          const updatedAppointment = {
-            ...appointment,
-            ...changed[appointment.id],
-          };
-          updateDoc(
-            doc(db, 'appointments', appointment.id),
-            updatedAppointment
-          );
-          return updatedAppointment;
-        }
-        return appointment;
-      });
-    }
-
-    if (deleted !== undefined) {
-      await deleteDoc(doc(db, 'appointments', deleted));
-      data = data.filter((appointment) => appointment.id !== deleted);
-    }
-
-    this.setState({ data });
   }
 
   changeAddedAppointment(addedAppointment) {
@@ -183,7 +206,9 @@ export default class Calendar extends React.PureComponent {
           <AllDayPanel />
           <EditRecurrenceMenu />
           <ConfirmationDialog />
-          <Appointments />
+          <Appointments
+            appointmentComponent={Appointment}
+          />
           <AppointmentTooltip showCloseButton showOpenButton showDeleteButton />
           <AppointmentForm />
         </Scheduler>
