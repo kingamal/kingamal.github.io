@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/scheduler/static/css/main.e6c13ad2.css",
+    "main.js": "/scheduler/static/js/main.3ffe6414.js",
+    "static/js/453.560036e2.chunk.js": "/scheduler/static/js/453.560036e2.chunk.js",
+    "index.html": "/scheduler/index.html",
+    "main.e6c13ad2.css.map": "/scheduler/static/css/main.e6c13ad2.css.map",
+    "main.3ffe6414.js.map": "/scheduler/static/js/main.3ffe6414.js.map",
+    "453.560036e2.chunk.js.map": "/scheduler/static/js/453.560036e2.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.e6c13ad2.css",
+    "static/js/main.3ffe6414.js"
+  ]
+}
