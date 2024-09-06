@@ -84,18 +84,16 @@ export default class Calendar extends React.PureComponent {
   async commitChanges({ added, changed, deleted }) {
     let { data } = this.state;
 
-    // Dodanie nowego wydarzenia
     if (added) {
-      const newAppointment = { ...added }; // Bez ID, Firestore sam je wygeneruje
+      const newAppointment = { ...added };
       const docRef = await addDoc(
         collection(db, 'appointments'),
         newAppointment
       );
-      newAppointment.id = docRef.id; // Przypisz ID wygenerowane przez Firestore
+      newAppointment.id = docRef.id;
       data = [...data, newAppointment];
     }
 
-    // Aktualizacja istniejącego wydarzenia
     if (changed) {
       data = data.map((appointment) => {
         if (changed[appointment.id]) {
@@ -106,16 +104,15 @@ export default class Calendar extends React.PureComponent {
           updateDoc(
             doc(db, 'appointments', appointment.id),
             updatedAppointment
-          ); // Zapis do Firestore
+          );
           return updatedAppointment;
         }
         return appointment;
       });
     }
 
-    // Usunięcie wydarzenia
     if (deleted !== undefined) {
-      await deleteDoc(doc(db, 'appointments', deleted)); // Usunięcie z Firestore
+      await deleteDoc(doc(db, 'appointments', deleted));
       data = data.filter((appointment) => appointment.id !== deleted);
     }
 

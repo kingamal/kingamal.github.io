@@ -2,7 +2,7 @@
   "name": "my-scheduler-app",
   "version": "0.1.0",
   "private": true,
-  "homepage": "http://kingamal.github.io/scheduler",
+  "homepage": "http://kingamal.github.io",
   "dependencies": {
     "@devexpress/dx-react-core": "^4.0.8",
     "@devexpress/dx-react-scheduler": "^4.0.8",
