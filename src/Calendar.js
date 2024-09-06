@@ -61,15 +61,20 @@ export default class Calendar extends React.PureComponent {
   async fetchAppointments() {
     const appointmentsRef = collection(db, 'appointments');
     const snapshot = await getDocs(appointmentsRef);
-    console.log('here', snapshot.docs)
     const appointments = snapshot.docs.map((doc) => {
       const data = doc.data();
       return {
         id: doc.id,
         title: data.title,
         allDay: data.allDay,
-        startDate: data.startDate instanceof Timestamp ? data.startDate.toDate() : data.startDate,
-        endDate: data.endDate instanceof Timestamp ? data.endDate.toDate() : data.endDate,
+        startDate:
+          data.startDate instanceof Timestamp
+            ? data.startDate.toDate()
+            : data.startDate,
+        endDate:
+          data.endDate instanceof Timestamp
+            ? data.endDate.toDate()
+            : data.endDate,
         rRule: data.rRule || null,
       };
     });
